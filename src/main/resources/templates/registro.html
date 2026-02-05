@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Cuenta</title>
+</head>
+<body>
+    <h1>Crear Cuenta</h1>
+
+    <div th:if="${param.error}">
+        <p style="color: red;" th:text="${param.error}"></p>
+    </div>
+
+    <form method="POST" action="/registro">
+        <div>
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+        <div>
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <label for="tipoPlan">Plan:</label>
+            <select id="tipoPlan" name="tipoPlan" required>
+                <option value="">Selecciona un plan</option>
+                <option value="BASIC">BASIC - $9.99/mes</option>
+                <option value="PREMIUM">PREMIUM - $29.99/mes</option>
+                <option value="ENTERPRISE">ENTERPRISE - $99.99/mes</option>
+            </select>
+        </div>
+        <button type="submit">Crear Cuenta</button>
+    </form>
+
+    <p>¿Ya tienes cuenta? <a href="/login">Iniciar sesión</a></p>
+</body>
+</html>
