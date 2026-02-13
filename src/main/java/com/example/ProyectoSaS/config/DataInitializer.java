@@ -1,20 +1,35 @@
 package com.example.ProyectoSaS.config;
 
-import com.example.ProyectoSaS.models.Plan;
-import com.example.ProyectoSaS.repositories.PlanRepository;
+import com.example.ProyectoSaS.models.*;
+import com.example.ProyectoSaS.repositories.*;
+import com.example.ProyectoSaS.enums.EstadoSuscripcion;
+import com.example.ProyectoSaS.enums.TipoPlan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private PlanRepository planRepository;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private PerfilRepository perfilRepository;
+    
+    @Autowired
+    private SuscripcionRepository suscripcionRepository;
+    
+    @Autowired
+    private FacturaRepository facturaRepository;
 
     @Override
     public void run(String... args) throws Exception {
-        // Crear planes si no existen
         if (planRepository.count() == 0) {
             Plan planBasic = new Plan();
             planBasic.setNombre("BASIC");
@@ -41,6 +56,48 @@ public class DataInitializer implements CommandLineRunner {
             planRepository.save(planEnterprise);
 
             System.out.println("Planes iniciales creados exitosamente");
+        }
+        
+        if (usuarioRepository.count() == 0) {
+            Usuario usuario = new Usuario();
+            usuario.setNombre("Juan");
+            usuario.setApellido("Pérez");
+            usuario.setEmail("juan@example.com");
+            usuario.setPassword("password123");
+            usuario.setPais("ES");
+            usuario = usuarioRepository.save(usuario);
+
+            Perfil perfil = new Perfil();
+            perfil.setUsuario(usuario);
+            perfilRepository.save(perfil);
+
+            Plan planPremium = planRepository.findAll().stream()
+                .filter(p -> "PREMIUM".equals(p.getNombre()))
+                .findFirst()
+                .orElse(planRepository.findAll().get(0));
+            
+            Suscripcion suscripcion = new Suscripcion();
+            suscripcion.setUsuario(usuario);
+            suscripcion.setTipoPlan(TipoPlan.PREMIUM);
+            suscripcion.setEstado(EstadoSuscripcion.ACTIVA);
+            suscripcion.setFechaInicio(LocalDateTime.now().minusDays(30));
+            suscripcionRepository.save(suscripcion);
+
+            for (int i = 1; i <= 5; i++) {
+                Factura factura = new Factura();
+                factura.setUsuario(usuario);
+                factura.setNumeroFactura("FAC-2026-" + String.format("%04d", i));
+                factura.setFechaEmision(LocalDateTime.now().minusDays(30 - i * 5));
+                factura.setFechaVencimiento(LocalDateTime.now().minusDays(30 - i * 5).plusDays(30));
+                factura.setMonto(new BigDecimal("100.00"));
+                factura.setPorcentajeImpuesto(new BigDecimal("21"));
+                factura.setMontoImpuesto(new BigDecimal("21.00"));
+                factura.setTotalConImpuesto(new BigDecimal("121.00"));
+                factura.setEstado(i <= 2 ? "PAGADA" : "PENDIENTE");
+                facturaRepository.save(factura);
+            }
+
+            System.out.println("Datos de prueba creados: Usuario, perfil, suscripción y facturas");
         }
     }
 }

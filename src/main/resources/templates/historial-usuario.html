@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Usuario - ProyectoSaS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .back-link {
+            color: #1e3c72;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .admin-badge {
+            background: #dc3545;
+            color: white;
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .user-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .user-card h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+        }
+
+        .user-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-value {
+            color: #666;
+        }
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: #1e3c72;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status.pagada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .action-btn {
+            background: #1e3c72;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85em;
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+        }
+
+        .action-btn:hover {
+            background: #2a5298;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                grid-template-columns: 1fr;
+            }
+
+            .statistics {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Historial de Usuario</h1>
+            <p>Registro detallado de actividades del usuario</p>
+        </header>
+
+        <div class="content">
+            <a href="/admin/auditoria" class="back-link">← Volver a Auditoría</a>
+            <span class="admin-badge">👤 Acceso Administrativo</span>
+
+            <div class="user-card">
+                <h2>👤 Información del Usuario</h2>
+                <div class="user-info">
+                    <div>
+                        <p><span class="user-label">ID:</span> <span class="user-value" th:text="${usuario.id}"></span></p>
+                        <p><span class="user-label">Nombre completo:</span> <span class="user-value" th:text="${usuario.nombre} + ' ' + ${usuario.apellido}"></span></p>
+                    </div>
+                    <div>
+                        <p><span class="user-label">Email:</span> <span class="user-value" th:text="${usuario.email}"></span></p>
+                        <p><span class="user-label">Fecha de registro:</span> <span class="user-value" th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="statistics">
+                <div class="stat-card">
+                    <h3>Total de Facturas</h3>
+                    <div class="value" th:text="${totalFacturasUsuario}"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Facturas Pagadas</h3>
+                    <div class="value" th:text="${facturasPagadas}"></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Facturas Pendientes</h3>
+                    <div class="value" th:text="${totalFacturasUsuario - facturasPagadas}"></div>
+                </div>
+            </div>
+
+            <h3 style="color: #1e3c72; margin: 30px 0 20px 0; border-bottom: 2px solid #1e3c72; padding-bottom: 10px;">📋 Facturas del Usuario</h3>
+
+            <div class="table-container">
+                <table th:if="${!facturas.isEmpty()}">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Número Factura</th>
+                            <th>Fecha Emisión</th>
+                            <th>Monto</th>
+                            <th>Total con Impuestos</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="factura : ${facturas}">
+                            <td th:text="${factura.id}"></td>
+                            <td th:text="${factura.numeroFactura}"></td>
+                            <td th:text="${#temporals.format(factura.fechaEmision, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td>€<span th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span></td>
+                            <td>
+                                €<span th:if="${factura.totalConImpuesto}" th:text="${#numbers.formatDecimal(factura.totalConImpuesto, 1, 2)}"></span>
+                                <span th:unless="${factura.totalConImpuesto}" th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span>
+                            </td>
+                            <td>
+                                <span class="status" th:classappend="*{factura.estado == 'PAGADA' ? 'pagada' : 'pendiente'}" th:text="${factura.estado}"></span>
+                            </td>
+                            <td>
+                                <a class="action-btn" th:href="@{/admin/auditoria/factura/{id}(id=${factura.id})}">Ver Detalle</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${facturas.isEmpty()}" class="no-data">
+                    <p>📭 Este usuario no tiene facturas registradas</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ProyectoSaS - Panel de Auditoría y Cumplimiento</p>
+        </footer>
+    </div>
+</body>
+</html>

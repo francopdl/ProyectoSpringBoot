@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Factura - ProyectoSaS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .factura-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .factura-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .factura-info h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .detalle-economico {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+
+        .detalle-economico h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .economico-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95em;
+        }
+
+        .economico-row:last-child {
+            border-bottom: none;
+        }
+
+        .economico-row.total {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1.2em;
+            border: none;
+        }
+
+        .amount {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .economico-row.total .amount {
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-badge.pagada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .usuario-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .usuario-info h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .usuario-info p {
+            margin: 8px 0;
+            color: #333;
+        }
+
+        .Usuario-strong {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        button, .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover, .btn:hover {
+            background: #764ba2;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .factura-header {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button, .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Detalle de Factura</h1>
+        </header>
+
+        <div class="content">
+            <a href="/facturacion" class="back-link">← Volver a Facturación</a>
+
+            <div class="usuario-info">
+                <h3>👤 Información del Usuario</h3>
+                <p><span class="usuario-strong">Nombre:</span> <span th:text="${usuario.nombre} + ' ' + ${usuario.apellido}"></span></p>
+                <p><span class="usuario-strong">Email:</span> <span th:text="${usuario.email}"></span></p>
+                <p><span class="usuario-strong">País:</span> <span th:text="${nombrePais}"></span></p>
+            </div>
+
+            <div class="factura-header">
+                <div class="factura-info">
+                    <h2>📋 Información de la Factura</h2>
+                    <div class="info-row">
+                        <span class="info-label">Número de Factura:</span>
+                        <span class="info-value" th:text="${factura.numeroFactura}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Fecha Emisión:</span>
+                        <span class="info-value" th:text="${#temporals.format(factura.fechaEmision, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Fecha Vencimiento:</span>
+                        <span class="info-value" th:text="${#temporals.format(factura.fechaVencimiento, 'dd/MM/yyyy')}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Suscripción ID:</span>
+                        <span class="info-value" th:text="${factura.suscripcion.id}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Plan:</span>
+                        <span class="info-value" th:text="${factura.suscripcion.tipoPlan}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Estado:</span>
+                        <span class="status-badge" th:classappend="*{factura.estado == 'PAGADA' ? 'pagada' : 'pendiente'}" th:text="${factura.estado}"></span>
+                    </div>
+                </div>
+
+                <div class="detalle-economico">
+                    <h2>💰 Desglose Económico</h2>
+                    <div class="economico-row">
+                        <span>Base Imponible:</span>
+                        <span class="amount">€<span th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span></span>
+                    </div>
+                    <div class="economico-row">
+                        <span>Porcentaje Impuesto (<span th:text="${nombrePais}"></span>):</span>
+                        <span th:if="${factura.porcentajeImpuesto}" th:text="${#numbers.formatDecimal(factura.porcentajeImpuesto, 1, 2)} + '%'"></span>
+                        <span th:unless="${factura.porcentajeImpuesto}">N/A</span>
+                    </div>
+                    <div class="economico-row">
+                        <span>Importe Impuesto:</span>
+                        <span class="amount">
+                            €<span th:if="${factura.montoImpuesto}" th:text="${#numbers.formatDecimal(factura.montoImpuesto, 1, 2)}"></span>
+                            <span th:unless="${factura.montoImpuesto}">0.00</span>
+                        </span>
+                    </div>
+                    <div class="economico-row total">
+                        <span>TOTAL CON IMPUESTOS:</span>
+                        <span class="amount">
+                            €<span th:if="${factura.totalConImpuesto}" th:text="${#numbers.formatDecimal(factura.totalConImpuesto, 1, 2)}"></span>
+                            <span th:unless="${factura.totalConImpuesto}" th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="window.print()">🖨️ Imprimir Factura</button>
+                <a href="/facturacion" class="btn">⬅️ Volver a Facturación</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ProyectoSaS - Sistema de Gestión de Suscripciones</p>
+        </footer>
+    </div>
+</body>
+</html>

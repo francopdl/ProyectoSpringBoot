@@ -32,6 +32,9 @@ public class Usuario implements Serializable {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = true)
+    private String pais = "ES";
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 

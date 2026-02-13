@@ -1,4 +1,4 @@
-package com.example.ProyectoSaS.controllers;
+package com.example.ProyectoSaS.TaskController;
 
 import com.example.ProyectoSaS.Services.SuscripcionService;
 import com.example.ProyectoSaS.Services.UsuarioService;
@@ -35,7 +35,7 @@ public class DashboardController {
             return "redirect:/login";
         }
 
-        // Obtener información de suscripción
+        
         Optional<Suscripcion> suscripcionOpt = suscripcionService.obtenerSuscripcionPorUsuario(usuarioId);
         
         if (suscripcionOpt.isPresent()) {

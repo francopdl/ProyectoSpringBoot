@@ -1,4 +1,4 @@
-package com.example.ProyectoSaS.controllers;
+package com.example.ProyectoSaS.TaskController;
 
 import com.example.ProyectoSaS.Services.PerfilService;
 import com.example.ProyectoSaS.Services.SuscripcionService;
@@ -64,7 +64,7 @@ public class AuthController {
                                   @RequestParam String tipoPlan,
                                   HttpSession session) {
         try {
-            // Crear usuario
+           
             Usuario usuario = new Usuario();
             usuario.setNombre(nombre);
             usuario.setApellido(apellido);
@@ -73,14 +73,13 @@ public class AuthController {
             
             usuario = usuarioService.registrarUsuario(usuario);
 
-            // Crear perfil
+            
             perfilService.crearPerfil(usuario);
 
-            // Crear suscripción con el plan seleccionado
+          
             TipoPlan plan = TipoPlan.valueOf(tipoPlan);
             suscripcionService.crearSuscripcion(usuario, plan);
 
-            // Iniciar sesión automáticamente
             session.setAttribute("usuarioId", usuario.getId());
             session.setAttribute("nombreUsuario", usuario.getNombre());
             session.setAttribute("email", usuario.getEmail());
@@ -91,7 +90,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("logout")
+    @RequestMapping(value = "logout", method = {RequestMethod.GET, RequestMethod.POST})
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/login";

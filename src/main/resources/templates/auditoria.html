@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoría - Admin</title>
+</head>
+<body>
+    <h1>Panel de Auditoría - Administrador</h1>
+    <a href="/dashboard">Volver</a>
+
+    <h2>Filtros</h2>
+    <form method="post" action="/admin/auditoria/filtrar-fechas">
+        Desde: <input type="datetime-local" name="fechaInicio" required>
+        Hasta: <input type="datetime-local" name="fechaFin" required>
+        <button type="submit">Filtrar fechas</button>
+    </form>
+
+    <form method="post" action="/admin/auditoria/filtrar-operacion">
+        <select name="operacion" required>
+            <option value="">-- Selecciona --</option>
+            <option value="PAGADA">Pagada</option>
+            <option value="PENDIENTE">Pendiente</option>
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <h2>Resumen</h2>
+    <p>Total facturas: <span th:text="${totalFacturas}"></span></p>
+    <p>Activas: <span th:text="${facturasActivas}"></span></p>
+    <p>Pendientes: <span th:text="${facturasPendientes}"></span></p>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Factura</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        <tr th:each="factura : ${facturas}">
+            <td th:text="${factura.id}"></td>
+            <td th:text="${factura.usuario.nombre} + ' ' + ${factura.usuario.apellido}"></td>
+            <td th:text="${factura.usuario.email}"></td>
+            <td th:text="${factura.numeroFactura}"></td>
+            <td th:text="${#temporals.format(factura.fechaEmision, 'dd/MM/yyyy')}"></td>
+            <td>€<span th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span></td>
+            <td th:text="${factura.estado}"></td>
+            <td>
+                <a th:href="@{/admin/auditoria/factura/{id}(id=${factura.id})}">Ver</a>
+                <a th:href="@{/admin/auditoria/usuario/{id}(id=${factura.usuario.id})}">Historial</a>
+            </td>
+        </tr>
+    </table>
+
+    <p th:if="${facturas.isEmpty()}">No hay registros</p>
+</body>
+</html>

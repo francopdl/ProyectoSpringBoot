@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+</head>
+<body>
+    <h1>Ha ocurrido un error</h1>
+    
+    <p th:if="${error}" style="color: red;">
+        <strong>Error:</strong> <span th:text="${error}"></span>
+    </p>
+    
+    <p th:if="${detalleError}" style="color: darkred; font-family: monospace; background: #f0f0f0; padding: 10px;">
+        <strong>Detalle:</strong> <span th:text="${detalleError}"></span>
+    </p>
+    
+    <a href="/dashboard">Volver al Dashboard</a>
+    <a href="/login">Volver al Login</a>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Auditoría - ProyectoSaS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+        }
+
+        .report-header h2 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .report-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .admin-badge {
+            background: #dc3545;
+            color: white;
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .statistics-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .statistics-section h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #1e3c72;
+            padding-bottom: 10px;
+        }
+
+        .statistics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .stat-item h4 {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .stat-item p {
+            color: #1e3c72;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .summary-section {
+            background: #e8f0ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1e3c72;
+            margin-bottom: 30px;
+        }
+
+        .summary-section h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .summary-section p {
+            color: #333;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+
+        .recommendations {
+            background: #fff8e1;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 30px;
+        }
+
+        .recommendations h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .recommendations ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .recommendations li {
+            margin: 8px 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        button, .btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover, .btn:hover {
+            background: #2a5298;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .back-link {
+            color: #1e3c72;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            button, .btn, .action-buttons, .back-link {
+                display: none;
+            }
+
+            header {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .statistics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button, .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Reporte de Auditoría</h1>
+            <p>Análisis completo de operaciones y cumplimiento</p>
+        </header>
+
+        <div class="content">
+            <a href="/admin/auditoria" class="back-link">← Volver a Auditoría</a>
+
+            <div class="report-header">
+                <h2>REPORTE OFICIAL DE AUDITORÍA</h2>
+                <p class="report-date">
+                    Generado el <span th:text="${#temporals.format(fechaGeneracion, 'dd/MM/yyyy')}"></span>
+                    a las <span th:text="${#temporals.format(fechaGeneracion, 'HH:mm:ss')}"></span>
+                </p>
+                <span class="admin-badge">👤 Documento Confidencial - Acceso Administrativo</span>
+            </div>
+
+            <div class="statistics-section">
+                <h3>📈 Estadísticas Generales del Sistema</h3>
+                <div class="statistics-grid">
+                    <div class="stat-item">
+                        <h4>Total de Operaciones</h4>
+                        <p th:text="${totalFacturas}"></p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Operaciones Activas</h4>
+                        <p th:text="${facturasActivas}"></p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Operaciones Pendientes</h4>
+                        <p th:text="${facturasPendientes}"></p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Tasa de Finalización</h4>
+                        <p th:text="${totalFacturas > 0 ? (#numbers.formatPercent(facturasActivas / totalFacturas, 1)) : '0%'}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h4>📋 Resumen Ejecutivo</h4>
+                <p>
+                    Se registran <strong th:text="${totalFacturas}"></strong> operaciones totales en el sistema.
+                    De estas, <strong th:text="${facturasActivas}"></strong> han sido procesadas exitosamente
+                    (<strong th:text="${totalFacturas > 0 ? (#numbers.formatPercent(facturasActivas / totalFacturas, 1)) : '0%'}"></strong>),
+                    mientras que <strong th:text="${facturasPendientes}"></strong> se encuentran en estado pendiente.
+                </p>
+                <p>
+                    El sistema mantiene un registro completo y auditable de todas las operaciones realizadas,
+                    incluyendo fechas de emisión, estados de procesamiento, y detalles de impuestos calculados
+                    según la jurisdicción del usuario.
+                </p>
+                <p>
+                    Las renovaciones automáticas están configuradas para ejecutarse diariamente, asegurando
+                    que las suscripciones activas se renueven en tiempo programado.
+                </p>
+            </div>
+
+            <div class="recommendations">
+                <h4>⚡ Recomendaciones</h4>
+                <ul>
+                    <li>Continuar monitoreando la tasa de finalización de operaciones</li>
+                    <li>Revisar regularmente los registros de auditoría para detección de anomalías</li>
+                    <li>Mantener actualizada la base de datos de impuestos por país</li>
+                    <li>Verificar que las renovaciones automáticas se ejecuten correctamente</li>
+                    <li>Realizar copias de seguridad periódicas de los datos de auditoría</li>
+                    <li>Comunicarse con usuarios con facturas pendientes para acelerar el pago</li>
+                </ul>
+            </div>
+
+            <div class="summary-section">
+                <h4>✅ Estado de Cumplimiento</h4>
+                <p>
+                    <strong>Sistema de Auditoría:</strong> Activo y funcionando correctamente ✓<br>
+                    <strong>Cálculo de Impuestos:</strong> Implementado por país ✓<br>
+                    <strong>Renovação Automática:</strong> Configurada y programada ✓<br>
+                    <strong>Filtrado de Datos:</strong> Disponible por fecha y monto ✓<br>
+                    <strong>Vistas Dinámicas:</strong> Facturación y auditoría implementadas ✓
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="window.print()">🖨️ Imprimir Reporte</button>
+                <a href="/admin/auditoria" class="btn">⬅️ Volver a Auditoría</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ProyectoSaS - Panel de Auditoría y Cumplimiento</p>
+            <p>Este documento contiene información confidencial de auditoría del sistema</p>
+        </footer>
+    </div>
+</body>
+</html>

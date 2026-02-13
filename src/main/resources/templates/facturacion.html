@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Facturación</title>
+</head>
+<body>
+    <h1>Facturación</h1>
+    <a href="/dashboard">Volver</a>
+
+    <div th:if="${mensaje}" style="color: green; padding: 10px; background: #e8f5e9; border-radius: 5px; margin-bottom: 15px;">
+        <strong>✓</strong> <span th:text="${mensaje}"></span>
+    </div>
+
+    <div th:if="${error}" style="color: red; padding: 10px; background: #ffebee; border-radius: 5px; margin-bottom: 15px;">
+        <strong>✗ Error:</strong> <span th:text="${error}"></span>
+    </div>
+
+    <h2>Crear Nueva Factura</h2>
+    <form method="post" action="/facturacion/crear" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <div style="margin-bottom: 10px;">
+            <label for="numeroFactura">Número de Factura:</label>
+            <input type="text" id="numeroFactura" name="numeroFactura" required placeholder="FAC-2026-0001">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="monto">Monto (€):</label>
+            <input type="number" id="monto" name="monto" required step="0.01" min="0" placeholder="100.00">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="porcentajeImpuesto">Porcentaje Impuesto (%):</label>
+            <input type="number" id="porcentajeImpuesto" name="porcentajeImpuesto" value="21" step="0.01" min="0" max="100">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label for="estado">Estado:</label>
+            <select id="estado" name="estado">
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="PAGADA">PAGADA</option>
+            </select>
+        </div>
+        <button type="submit" style="padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Crear Factura</button>
+    </form>
+
+    <h2>Filtros</h2>
+    <form method="post" action="/facturacion/filtrar-fechas">
+        Desde: <input type="datetime-local" name="fechaInicio" required>
+        Hasta: <input type="datetime-local" name="fechaFin" required>
+        <button type="submit">Filtrar fechas</button>
+    </form>
+
+    <form method="post" action="/facturacion/filtrar-montos">
+        Min: <input type="number" name="montoMin" step="0.01">
+        Max: <input type="number" name="montoMax" step="0.01">
+        <button type="submit">Filtrar montos</button>
+    </form>
+
+    <form method="post" action="/facturacion/filtrar-estado">
+        <select name="estado">
+            <option value="PAGADA">PAGADA</option>
+            <option value="PENDIENTE">PENDIENTE</option>
+        </select>
+        <button type="submit">Filtrar estado</button>
+    </form>
+
+    <h2>Resumen</h2>
+    <div th:if="${totalFacturas != null}">
+        <p><strong>Total facturas:</strong> <span th:text="${totalFacturas}"></span></p>
+        <p><strong>Base:</strong> €<span th:text="${totalMonto != null ? #numbers.formatDecimal(totalMonto, 1, 2) : '0.00'}"></span></p>
+        <p><strong>Impuestos:</strong> €<span th:text="${totalImpuestos != null ? #numbers.formatDecimal(totalImpuestos, 1, 2) : '0.00'}"></span></p>
+        <p><strong>Total:</strong> €<span th:text="${totalConImpuestos != null ? #numbers.formatDecimal(totalConImpuestos, 1, 2) : '0.00'}"></span></p>
+    </div>
+
+    <div th:if="${error}" style="color: red; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+        <strong>Error:</strong> <span th:text="${error}"></span>
+    </div>
+
+    <table border="1">
+        <tr>
+            <th>Número</th>
+            <th>Fecha</th>
+            <th>Base</th>
+            <th>Impuesto %</th>
+            <th>Impuesto</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        <tr th:each="factura : ${facturas}">
+            <td th:text="${factura.numeroFactura}"></td>
+            <td th:text="${#temporals.format(factura.fechaEmision, 'dd/MM/yyyy')}"></td>
+            <td th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></td>
+            <td th:text="${factura.porcentajeImpuesto}"></td>
+            <td th:text="${#numbers.formatDecimal(factura.montoImpuesto, 1, 2)}"></td>
+            <td th:text="${#numbers.formatDecimal(factura.totalConImpuesto, 1, 2)}"></td>
+            <td th:text="${factura.estado}"></td>
+            <td>
+                <a th:href="@{/facturacion/{id}(id=${factura.id})}">Ver</a>
+                <form method="post" action="/facturacion/marcar-pagada" style="display:inline;">
+                    <input type="hidden" name="facturaId" th:value="${factura.id}">
+                    <button type="submit" th:if="${factura.estado == 'PENDIENTE'}">Marcar Pagada</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <p th:if="${facturas.isEmpty()}">No hay facturas</p>
+</body>
+</html>

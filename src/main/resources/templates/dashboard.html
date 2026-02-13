@@ -1,10 +1,24 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
 </head>
 <body>
-    <h1>Hola <span th:text="${nombreUsuario}"></span>, tu plan es: <span th:text="${tipoPlan}"></span></h1>
+    <h1>Dashboard - ProyectoSaS</h1>
+
+    <h2>Bienvenido <span th:text="${nombreUsuario}"></span></h2>
+    <p>Plan: <strong th:text="${tipoPlan}"></strong></p>
+    <p>Estado: <strong th:text="${estadoSuscripcion}"></strong></p>
+    
+    <h3>Menu</h3>
+    <ul>
+        <li><a href="/facturacion">Facturación</a></li>
+        <li><a href="/admin/auditoria">Panel de Auditoría</a></li>
+    </ul>
+
+    <form method="post" action="/logout">
+        <button type="submit">Cerrar Sesión</button>
+    </form>
 </body>
 </html>

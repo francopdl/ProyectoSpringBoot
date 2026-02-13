@@ -32,6 +32,15 @@ public class Factura implements Serializable {
     @Column(nullable = false)
     private BigDecimal monto;
 
+    @Column(nullable = true)
+    private BigDecimal porcentajeImpuesto;
+
+    @Column(nullable = true)
+    private BigDecimal montoImpuesto;
+
+    @Column(nullable = true)
+    private BigDecimal totalConImpuesto;
+
     @Column(nullable = false, unique = true)
     private String numeroFactura;
 

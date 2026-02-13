@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Auditoría - ProyectoSaS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .back-link {
+            color: #1e3c72;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .admin-badge {
+            background: #dc3545;
+            color: white;
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .audit-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .audit-section h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .timestamp {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85em;
+        }
+
+        .status.pagada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .amount {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .audit-timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: #1e3c72;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 12px;
+            width: 2px;
+            height: calc(100% + 8px);
+            background: #1e3c72;
+        }
+
+        .timeline-item:last-child:after {
+            display: none;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .timeline-content h4 {
+            color: #1e3c72;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content p {
+            margin: 4px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        button, .btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover, .btn:hover {
+            background: #2a5298;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button, .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Detalle de Auditoría</h1>
+        </header>
+
+        <div class="content">
+            <a href="/admin/auditoria" class="back-link">← Volver a Auditoría</a>
+            <span class="admin-badge">👤 Acceso Administrativo</span>
+
+            <div class="audit-section">
+                <h2>👤 Información del Usuario</h2>
+                <div class="info-row">
+                    <span class="info-label">ID Usuario:</span>
+                    <span class="info-value" th:text="${usuario.id}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nombre:</span>
+                    <span class="info-value" th:text="${usuario.nombre} + ' ' + ${usuario.apellido}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" th:text="${usuario.email}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha de Registro:</span>
+                    <span class="info-value timestamp" th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                </div>
+            </div>
+
+            <div class="audit-section">
+                <h2>📄 Información de la Factura</h2>
+                <div class="info-row">
+                    <span class="info-label">ID Factura:</span>
+                    <span class="info-value" th:text="${factura.id}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Número de Factura:</span>
+                    <span class="info-value" th:text="${factura.numeroFactura}"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Monto Base:</span>
+                    <span class="info-value amount">€<span th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total con Impuestos:</span>
+                    <span class="info-value amount">
+                        €<span th:if="${factura.totalConImpuesto}" th:text="${#numbers.formatDecimal(factura.totalConImpuesto, 1, 2)}"></span>
+                        <span th:unless="${factura.totalConImpuesto}" th:text="${#numbers.formatDecimal(factura.monto, 1, 2)}"></span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Estado:</span>
+                    <span class="status" th:classappend="*{factura.estado == 'PAGADA' ? 'pagada' : 'pendiente'}" th:text="${factura.estado}"></span>
+                </div>
+            </div>
+
+            <div class="audit-section">
+                <h2>📅 Historial de Eventos</h2>
+                <div class="audit-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Factura Emitida</h4>
+                            <p class="timestamp" th:text="${#temporals.format(fechaEmision, 'dd/MM/yyyy HH:mm:ss')}"></p>
+                            <p>Se generó la factura número <strong th:text="${factura.numeroFactura}"></strong></p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Cambio de Estado</h4>
+                            <p class="timestamp" th:text="'Estado actual: ' + ${factura.estado}"></p>
+                            <p>Última actualización del estado de la operación</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>Fecha de Vencimiento</h4>
+                            <p class="timestamp" th:text="${#temporals.format(fechaVencimiento, 'dd/MM/yyyy')}"></p>
+                            <p>Vencimiento para esta operación</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="window.print()">🖨️ Imprimir Registro</button>
+                <a href="/admin/auditoria" class="btn">⬅️ Volver a Auditoría</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 ProyectoSaS - Panel de Auditoría y Cumplimiento</p>
+        </footer>
+    </div>
+</body>
+</html>
