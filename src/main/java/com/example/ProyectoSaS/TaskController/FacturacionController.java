@@ -1,11 +1,16 @@
 package com.example.ProyectoSaS.TaskController;
 
 import com.example.ProyectoSaS.Services.FacturaService;
+import com.example.ProyectoSaS.Services.FacturaPDFService;
+import com.example.ProyectoSaS.Services.SuscripcionService;
 import com.example.ProyectoSaS.Services.TaxService;
 import com.example.ProyectoSaS.Services.UsuarioService;
 import com.example.ProyectoSaS.models.Factura;
 import com.example.ProyectoSaS.models.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +36,12 @@ public class FacturacionController {
     @Autowired
     private TaxService taxService;
 
+    @Autowired
+    private SuscripcionService suscripcionService;
+
+    @Autowired
+    private FacturaPDFService facturaPDFService;
+
     @GetMapping
     public String mostrarFacturas(HttpSession session, Model model) {
         Long usuarioId = (Long) session.getAttribute("usuarioId");
@@ -45,7 +56,17 @@ public class FacturacionController {
         }
 
         Usuario usuario = usuarioOpt.get();
-        List<Factura> facturas = facturaService.obtenerFacturasPorUsuario(usuarioId);
+        
+        // Get all facturas and filter by usuario in this application
+        List<Factura> todasLasFacturas = facturaService.obtenerTodasLasFacturas();
+        List<Factura> facturas = todasLasFacturas.stream()
+            .filter(f -> f.getUsuario().getId().equals(usuarioId))
+            .toList();
+        
+        // Ensure facturas is never null
+        if (facturas == null) {
+            facturas = new java.util.ArrayList<>();
+        }
 
         model.addAttribute("usuario", usuario);
         model.addAttribute("facturas", facturas);
@@ -91,7 +112,12 @@ public class FacturacionController {
             LocalDateTime inicio = LocalDateTime.of(fechaInicioParsed, LocalTime.of(0, 0, 0));
             LocalDateTime fin = LocalDateTime.of(fechaFinParsed, LocalTime.of(23, 59, 59));
             
-            List<Factura> facturas = facturaService.obtenerFacturasPorUsuarioYFecha(usuarioId, inicio, fin);
+            // Get all facturas and filter by usuario and date range
+            List<Factura> todasLasFacturas = facturaService.obtenerTodasLasFacturas();
+            List<Factura> facturas = todasLasFacturas.stream()
+                .filter(f -> f.getUsuario().getId().equals(usuarioId))
+                .filter(f -> f.getFechaEmision().isAfter(inicio) && f.getFechaEmision().isBefore(fin))
+                .toList();
             
             Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
             if (usuarioOpt.isEmpty()) {
@@ -147,10 +173,15 @@ public class FacturacionController {
         }
 
         try {
-            if (montoMin == null) montoMin = BigDecimal.ZERO;
-            if (montoMax == null) montoMax = new BigDecimal("999999");
+            BigDecimal finalMontoMin = montoMin != null ? montoMin : BigDecimal.ZERO;
+            BigDecimal finalMontoMax = montoMax != null ? montoMax : new BigDecimal("999999");
 
-            List<Factura> facturas = facturaService.obtenerFacturasPorUsuarioYMonto(usuarioId, montoMin, montoMax);
+            // Get all facturas and filter by usuario and monto range
+            List<Factura> todasLasFacturas = facturaService.obtenerTodasLasFacturas();
+            List<Factura> facturas = todasLasFacturas.stream()
+                .filter(f -> f.getUsuario().getId().equals(usuarioId))
+                .filter(f -> f.getMonto().compareTo(finalMontoMin) >= 0 && f.getMonto().compareTo(finalMontoMax) <= 0)
+                .toList();
             
             Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
             if (usuarioOpt.isEmpty()) {
@@ -161,7 +192,7 @@ public class FacturacionController {
             model.addAttribute("usuario", usuario);
             model.addAttribute("facturas", facturas);
             model.addAttribute("totalFacturas", facturas.size());
-            model.addAttribute("filtroAplicado", "Facturas entre €" + montoMin + " y €" + montoMax);
+            model.addAttribute("filtroAplicado", "Facturas entre €" + finalMontoMin + " y €" + finalMontoMax);
             model.addAttribute("nombrePais", taxService.obtenerNombrePais(usuario.getPais()));
             
             BigDecimal totalMonto = facturas.stream()
@@ -204,7 +235,12 @@ public class FacturacionController {
         }
 
         try {
-            List<Factura> facturas = facturaService.obtenerFacturasPorUsuarioYEstado(usuarioId, estado);
+            // Get all facturas and filter by usuario and estado
+            List<Factura> todasLasFacturas = facturaService.obtenerTodasLasFacturas();
+            List<Factura> facturas = todasLasFacturas.stream()
+                .filter(f -> f.getUsuario().getId().equals(usuarioId))
+                .filter(f -> f.getEstado().equals(estado))
+                .toList();
             
             Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
             if (usuarioOpt.isEmpty()) {
@@ -271,9 +307,8 @@ public class FacturacionController {
             return "redirect:/login";
         }
 
-        Optional<Factura> facturaOpt = facturaService.obtenerFacturasPorUsuario(usuarioId)
-            .stream()
-            .filter(f -> f.getId().equals(facturaId))
+        Optional<Factura> facturaOpt = facturaService.obtenerTodasLasFacturas().stream()
+            .filter(f -> f.getId().equals(facturaId) && f.getUsuario().getId().equals(usuarioId))
             .findFirst();
 
         if (facturaOpt.isEmpty()) {
@@ -314,8 +349,16 @@ public class FacturacionController {
 
             Usuario usuario = usuarioOpt.get();
             
+            // Get user subscription - REQUIRED
+            Optional<com.example.ProyectoSaS.models.Suscripcion> suscripcionOpt = suscripcionService.obtenerSuscripcionPorUsuario(usuarioId);
+            if (suscripcionOpt.isEmpty()) {
+                model.addAttribute("error", "El usuario no tiene una suscripción activa");
+                return mostrarFacturas(session, model);
+            }
+            
             Factura factura = new Factura();
             factura.setUsuario(usuario);
+            factura.setSuscripcion(suscripcionOpt.get());
             factura.setNumeroFactura(numeroFactura);
             factura.setFechaEmision(LocalDateTime.now());
             factura.setFechaVencimiento(LocalDateTime.now().plusDays(30));
@@ -332,10 +375,83 @@ public class FacturacionController {
             facturaService.crearFactura(factura);
             
             model.addAttribute("mensaje", "Factura creada exitosamente");
+            return mostrarFacturas(session, model);
         } catch (Exception e) {
             model.addAttribute("error", "Error al crear factura: " + e.getMessage());
+            return mostrarFacturas(session, model);
+        }
+    }
+
+    @GetMapping("/descargar")
+    public ResponseEntity<byte[]> descargarFacturas(HttpSession session) {
+        Long usuarioId = (Long) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return ResponseEntity.status(401).build();
         }
 
-        return "redirect:/facturacion";
+        try {
+            Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+            if (usuarioOpt.isEmpty()) {
+                return ResponseEntity.status(401).build();
+            }
+
+            List<Factura> facturas = facturaService.obtenerFacturasPorUsuario(usuarioId);
+            byte[] pdfBytes = facturaPDFService.generarPDFMultiplesFacturas(facturas);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"facturas.pdf\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/configuracion")
+    public String mostrarConfiguracion(HttpSession session, Model model) {
+        Long usuarioId = (Long) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return "redirect:/login";
+        }
+
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return "redirect:/login";
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("pais", usuario.getPais());
+
+        return "configuracion-facturacion";
+    }
+
+    @PostMapping("/configuracion/actualizar")
+    public String actualizarConfiguracion(
+            @RequestParam(required = false) String pais,
+            @RequestParam(required = false) String empresa,
+            HttpSession session,
+            Model model) {
+        
+        Long usuarioId = (Long) session.getAttribute("usuarioId");
+        if (usuarioId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+            if (usuarioOpt.isPresent()) {
+                Usuario usuario = usuarioOpt.get();
+                if (pais != null && !pais.isEmpty()) {
+                    usuario.setPais(pais);
+                }
+                usuarioService.actualizarUsuario(usuario);
+                model.addAttribute("mensaje", "Configuración actualizada exitosamente");
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al actualizar configuración: " + e.getMessage());
+        }
+
+        return "redirect:/facturacion/configuracion";
     }
 }

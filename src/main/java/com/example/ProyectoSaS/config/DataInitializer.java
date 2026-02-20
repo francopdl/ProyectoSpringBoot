@@ -58,11 +58,20 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Planes iniciales creados exitosamente");
         }
         
-        if (usuarioRepository.count() == 0) {
+        if (usuarioRepository.count() == 0 || facturaRepository.count() < 5) {
+            // Clear incomplete data if detected
+            if (usuarioRepository.count() > 0 && facturaRepository.count() < 5) {
+                facturaRepository.deleteAll();
+                suscripcionRepository.deleteAll();
+                perfilRepository.deleteAll();
+                usuarioRepository.deleteAll();
+                System.out.println("Datos incompletos detectados, se reinicializan");
+            }
+            
             Usuario usuario = new Usuario();
-            usuario.setNombre("Juan");
-            usuario.setApellido("Pérez");
-            usuario.setEmail("juan@example.com");
+            usuario.setNombre("Franco");
+            usuario.setApellido("García");
+            usuario.setEmail("franco@example.com");
             usuario.setPassword("password123");
             usuario.setPais("ES");
             usuario = usuarioRepository.save(usuario);
@@ -81,11 +90,12 @@ public class DataInitializer implements CommandLineRunner {
             suscripcion.setTipoPlan(TipoPlan.PREMIUM);
             suscripcion.setEstado(EstadoSuscripcion.ACTIVA);
             suscripcion.setFechaInicio(LocalDateTime.now().minusDays(30));
-            suscripcionRepository.save(suscripcion);
+            suscripcion = suscripcionRepository.save(suscripcion);
 
             for (int i = 1; i <= 5; i++) {
                 Factura factura = new Factura();
                 factura.setUsuario(usuario);
+                factura.setSuscripcion(suscripcion);
                 factura.setNumeroFactura("FAC-2026-" + String.format("%04d", i));
                 factura.setFechaEmision(LocalDateTime.now().minusDays(30 - i * 5));
                 factura.setFechaVencimiento(LocalDateTime.now().minusDays(30 - i * 5).plusDays(30));
